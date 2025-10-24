@@ -45,6 +45,62 @@ h1 {
     color: var(--primary-color);
 }
 
+/* 接続ステータス */
+.connection-status-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.connection-status {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.connection-status::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    transition: background-color 0.3s ease;
+}
+
+.connection-status.connected {
+    background-color: #e6fffa;
+    color: #047857;
+}
+
+.connection-status.connected::before {
+    background-color: #10b981;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.connection-status.disconnected {
+    background-color: #fff7ed;
+    color: #c2410c;
+}
+
+.connection-status.disconnected::before {
+    background-color: #f97316;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
 .status-text {
     font-size: 16px;
     color: #718096;

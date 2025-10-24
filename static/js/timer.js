@@ -2,6 +2,8 @@
 let currentMode = 'idle';
 let remainingSeconds = 0;
 let timerInterval = null;
+let socket = null;
+let isSocketConnected = false;
 const CIRCLE_CIRCUMFERENCE = 754; // 2 * π * 120
 
 // DOM要素
@@ -13,12 +15,77 @@ const breakBtn = document.getElementById('breakBtn');
 const stopBtn = document.getElementById('stopBtn');
 const completedCount = document.getElementById('completedCount');
 const totalTime = document.getElementById('totalTime');
+const connectionStatus = document.getElementById('connectionStatus');
 
 // 初期化
 document.addEventListener('DOMContentLoaded', () => {
+    initializeSocket();
     fetchState();
-    setInterval(fetchState, 60000); // 1分毎に再同期
+    // Fallback: 60秒毎にポーリング（WebSocket未接続時の補完）
+    setInterval(() => {
+        if (!isSocketConnected) {
+            fetchState();
+        }
+    }, 60000);
 });
+
+// Socket.IO初期化
+function initializeSocket() {
+    try {
+        // Socket.IOクライアントライブラリを使用
+        socket = io({
+            transports: ['websocket', 'polling'], // WebSocket優先、フォールバックとしてpolling
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionAttempts: 5
+        });
+
+        socket.on('connect', () => {
+            console.log('WebSocket接続成功');
+            isSocketConnected = true;
+            updateConnectionStatus(true);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('WebSocket切断');
+            isSocketConnected = false;
+            updateConnectionStatus(false);
+        });
+
+        socket.on('connect_error', (error) => {
+            console.error('WebSocket接続エラー:', error);
+            isSocketConnected = false;
+            updateConnectionStatus(false);
+        });
+
+        // state_updateイベントをリッスン
+        socket.on('state_update', (data) => {
+            console.log('状態更新を受信:', data);
+            updateUI(data);
+        });
+    } catch (error) {
+        console.error('Socket.IO初期化エラー:', error);
+        isSocketConnected = false;
+        updateConnectionStatus(false);
+    }
+}
+
+// 接続ステータス表示更新
+function updateConnectionStatus(connected) {
+    if (!connectionStatus) return;
+    
+    if (connected) {
+        connectionStatus.classList.add('connected');
+        connectionStatus.classList.remove('disconnected');
+        connectionStatus.textContent = '接続済み';
+        connectionStatus.title = 'リアルタイム同期が有効です';
+    } else {
+        connectionStatus.classList.remove('connected');
+        connectionStatus.classList.add('disconnected');
+        connectionStatus.textContent = 'ポーリング中';
+        connectionStatus.title = 'WebSocket未接続、ポーリングモードで動作中';
+    }
+}
 
 // API呼び出し
 async function fetchState() {
@@ -39,7 +106,10 @@ async function startFocus() {
             body: JSON.stringify({ duration_minutes: 25 })
         });
         if (response.ok) {
-            await fetchState();
+            // WebSocketで自動更新されるため、未接続時のみfetchState呼び出し
+            if (!isSocketConnected) {
+                await fetchState();
+            }
         } else {
             const error = await response.json();
             alert(error.error || '開始に失敗しました');
@@ -58,7 +128,10 @@ async function startBreak() {
             body: JSON.stringify({ duration_minutes: 5 })
         });
         if (response.ok) {
-            await fetchState();
+            // WebSocketで自動更新されるため、未接続時のみfetchState呼び出し
+            if (!isSocketConnected) {
+                await fetchState();
+            }
         } else {
             const error = await response.json();
             alert(error.error || '休憩開始に失敗しました');
@@ -75,7 +148,10 @@ async function stopSession() {
             method: 'POST'
         });
         if (response.ok) {
-            await fetchState();
+            // WebSocketで自動更新されるため、未接続時のみfetchState呼び出し
+            if (!isSocketConnected) {
+                await fetchState();
+            }
         }
     } catch (error) {
         console.error('停止エラー:', error);

@@ -7,6 +7,19 @@ FOCUS_DEFAULT_MINUTES = 25
 BREAK_DEFAULT_MINUTES = 5
 
 
+def _emit_state_update():
+    """Emit state update to all connected clients via SocketIO."""
+    try:
+        from app import socketio
+        if socketio:
+            state = get_state()
+            socketio.emit('state_update', state, namespace='/')
+    except Exception as e:
+        # Log error but don't fail the operation
+        import logging
+        logging.warning(f"Failed to emit state update: {e}")
+
+
 def start_focus(duration_minutes: int = FOCUS_DEFAULT_MINUTES) -> PomodoroSession:
     # Validate duration
     validate_duration(duration_minutes)
@@ -27,6 +40,10 @@ def start_focus(duration_minutes: int = FOCUS_DEFAULT_MINUTES) -> PomodoroSessio
     )
     db.session.add(session)
     db.session.commit()
+    
+    # Emit state update to all connected clients
+    _emit_state_update()
+    
     return session
 
 
@@ -50,6 +67,10 @@ def start_break(duration_minutes: int = BREAK_DEFAULT_MINUTES) -> PomodoroSessio
     )
     db.session.add(session)
     db.session.commit()
+    
+    # Emit state update to all connected clients
+    _emit_state_update()
+    
     return session
 
 
@@ -59,6 +80,9 @@ def stop_active_session() -> None:
         active.status = 'aborted'
         active.end_at = datetime.now(timezone.utc)
         db.session.commit()
+        
+        # Emit state update to all connected clients
+        _emit_state_update()
 
 
 def complete_session(session_id: int) -> None:
@@ -80,6 +104,9 @@ def complete_session(session_id: int) -> None:
         stat.total_focus_seconds += session.planned_duration_sec
     
     db.session.commit()
+    
+    # Emit state update to all connected clients
+    _emit_state_update()
 
 
 def get_state() -> dict:
