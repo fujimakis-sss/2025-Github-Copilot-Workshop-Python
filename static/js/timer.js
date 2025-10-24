@@ -24,24 +24,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // トースト通知を表示
 function showToast(message) {
-    // 重複防止: 同じメッセージを連続で表示しない
-    if (message === lastToastMessage) {
+    // 重複防止: 同じメッセージが現在表示中の場合はスキップ
+    if (message === lastToastMessage && toast.classList.contains('show')) {
         return;
     }
     lastToastMessage = message;
     
+    // 既存のトーストがあれば即座に非表示
+    if (toast.classList.contains('show')) {
+        toast.classList.remove('show');
+    }
+    
     // メッセージを設定
     toast.textContent = message;
     
-    // 表示
-    toast.classList.add('show');
+    // 少し待ってから表示（前のトーストのアニメーションが完了するのを待つ）
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
     
     // 3秒後に自動的に非表示
     setTimeout(() => {
         toast.classList.remove('show');
         // 非表示後、重複防止フラグをクリア
         setTimeout(() => {
-            lastToastMessage = '';
+            if (toast.textContent === message) {
+                lastToastMessage = '';
+            }
         }, 300); // アニメーション完了を待つ
     }, 3000);
 }
