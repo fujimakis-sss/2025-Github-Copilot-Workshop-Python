@@ -14,6 +14,12 @@
         <div class="timer-text" id="timerText">25:00</div>
     </div>
     
+    <div class="tag-input-container">
+        <label for="tagInput">タグ:</label>
+        <input type="text" id="tagInput" class="tag-input" placeholder="例: プロジェクトA" maxlength="50" list="recentTags" />
+        <datalist id="recentTags"></datalist>
+    </div>
+    
     <div class="controls">
         <button id="startBtn" class="btn btn-primary" aria-label="フォーカス開始">開始</button>
         <button id="breakBtn" class="btn btn-secondary" aria-label="休憩開始">休憩</button>
@@ -29,6 +35,13 @@
         <div class="stat-item">
             <span class="stat-value" id="totalTime">1時間40分</span>
             <span class="stat-label">集中時間</span>
+        </div>
+    </div>
+    
+    <div class="tag-stats">
+        <h2>タグ別統計</h2>
+        <div id="tagStatsContent" class="tag-stats-content">
+            <!-- Tag stats will be populated here -->
         </div>
     </div>
 </div>

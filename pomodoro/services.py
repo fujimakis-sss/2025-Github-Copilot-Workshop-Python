@@ -1,15 +1,16 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from .models import db, PomodoroSession, DailyStat
-from .validators import validate_duration
+from .validators import validate_duration, validate_tag
 
 FOCUS_DEFAULT_MINUTES = 25
 BREAK_DEFAULT_MINUTES = 5
 
 
-def start_focus(duration_minutes: int = FOCUS_DEFAULT_MINUTES) -> PomodoroSession:
-    # Validate duration
+def start_focus(duration_minutes: int = FOCUS_DEFAULT_MINUTES, tag: Optional[str] = None) -> PomodoroSession:
+    # Validate duration and tag
     validate_duration(duration_minutes)
+    validate_tag(tag)
     
     # アクティブなセッションがあればエラー
     active = PomodoroSession.query.filter_by(status='active').first()
@@ -23,16 +24,18 @@ def start_focus(duration_minutes: int = FOCUS_DEFAULT_MINUTES) -> PomodoroSessio
         planned_duration_sec=duration_sec,
         start_at=now,
         planned_end_at=now + timedelta(seconds=duration_sec),
-        status='active'
+        status='active',
+        tag=tag
     )
     db.session.add(session)
     db.session.commit()
     return session
 
 
-def start_break(duration_minutes: int = BREAK_DEFAULT_MINUTES) -> PomodoroSession:
-    # Validate duration
+def start_break(duration_minutes: int = BREAK_DEFAULT_MINUTES, tag: Optional[str] = None) -> PomodoroSession:
+    # Validate duration and tag
     validate_duration(duration_minutes)
+    validate_tag(tag)
     
     # アクティブなセッションがあればエラー
     active = PomodoroSession.query.filter_by(status='active').first()
@@ -46,7 +49,8 @@ def start_break(duration_minutes: int = BREAK_DEFAULT_MINUTES) -> PomodoroSessio
         planned_duration_sec=duration_sec,
         start_at=now,
         planned_end_at=now + timedelta(seconds=duration_sec),
-        status='active'
+        status='active',
+        tag=tag
     )
     db.session.add(session)
     db.session.commit()
@@ -110,4 +114,60 @@ def get_state() -> dict:
         'completed_focus_count': stat.completed_focus_count if stat else 0,
         'total_focus_seconds': stat.total_focus_seconds if stat else 0
     }
+
+
+def get_stats_by_tag() -> list:
+    """
+    Get statistics grouped by tag.
+    
+    Returns:
+        List of dictionaries with tag statistics
+    """
+    from sqlalchemy import func
+    
+    # Query sessions grouped by tag, counting completed focus sessions
+    stats = db.session.query(
+        PomodoroSession.tag,
+        func.count(PomodoroSession.id).label('count'),
+        func.sum(PomodoroSession.planned_duration_sec).label('total_seconds')
+    ).filter(
+        PomodoroSession.type == 'focus',
+        PomodoroSession.status == 'completed'
+    ).group_by(PomodoroSession.tag).all()
+    
+    result = []
+    for tag, count, total_seconds in stats:
+        result.append({
+            'tag': tag,
+            'completed_focus_count': count,
+            'total_focus_seconds': total_seconds or 0
+        })
+    
+    return result
+
+
+def get_recent_tags(limit: int = 10) -> list:
+    """
+    Get recently used tags.
+    
+    Args:
+        limit: Maximum number of tags to return
+        
+    Returns:
+        List of unique tags ordered by most recent use
+    """
+    from sqlalchemy import func
+    
+    # Get unique tags from recent sessions, excluding None
+    tags = db.session.query(
+        PomodoroSession.tag
+    ).filter(
+        PomodoroSession.tag.isnot(None)
+    ).group_by(
+        PomodoroSession.tag
+    ).order_by(
+        func.max(PomodoroSession.start_at).desc()
+    ).limit(limit).all()
+    
+    return [tag[0] for tag in tags]
 
