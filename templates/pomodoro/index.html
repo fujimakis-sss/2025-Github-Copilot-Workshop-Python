@@ -2,9 +2,9 @@
 
 {% block content %}
 <div class="pomodoro-container">
-    <h1>ポモドーロタイマー</h1>
+    <h1>{{ _('Pomodoro Timer') }}</h1>
     
-    <div class="status-text" id="statusText">作業中</div>
+    <div class="status-text" id="statusText">{{ _('Working') }}</div>
     
     <div class="timer-display">
         <svg class="progress-ring" width="300" height="300">
@@ -15,20 +15,20 @@
     </div>
     
     <div class="controls">
-        <button id="startBtn" class="btn btn-primary" aria-label="フォーカス開始">開始</button>
-        <button id="breakBtn" class="btn btn-secondary" aria-label="休憩開始">休憩</button>
-        <button id="stopBtn" class="btn btn-danger" aria-label="停止" disabled>リセット</button>
+        <button id="startBtn" class="btn btn-primary" aria-label="{{ _('Start Focus') }}">{{ _('Start') }}</button>
+        <button id="breakBtn" class="btn btn-secondary" aria-label="{{ _('Start Break') }}">{{ _('Break') }}</button>
+        <button id="stopBtn" class="btn btn-danger" aria-label="{{ _('Stop') }}" disabled>{{ _('Reset') }}</button>
     </div>
     
     <div class="stats">
-        <h2>今日の進捗</h2>
+        <h2>{{ _("Today's Progress") }}</h2>
         <div class="stat-item">
             <span class="stat-value" id="completedCount">4</span>
-            <span class="stat-label">完了</span>
+            <span class="stat-label">{{ _('Completed') }}</span>
         </div>
         <div class="stat-item">
-            <span class="stat-value" id="totalTime">1時間40分</span>
-            <span class="stat-label">集中時間</span>
+            <span class="stat-value" id="totalTime">{{ _('1 hour 40 minutes') }}</span>
+            <span class="stat-label">{{ _('Focus Time') }}</span>
         </div>
     </div>
 </div>
@@ -47,5 +47,17 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+    // Localized strings for JavaScript
+    const i18n = {
+        working: "{{ _('Working') }}",
+        breaking: "{{ _('On Break') }}",
+        idle: "{{ _('Idle') }}",
+        startFailed: "{{ _('Failed to start') }}",
+        breakFailed: "{{ _('Failed to start break') }}",
+        hours: "{{ _('hours') }}",
+        minutes: "{{ _('minutes') }}"
+    };
+</script>
 <script src="{{ url_for('static', filename='js/timer.js') }}"></script>
 {% endblock %}

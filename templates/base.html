@@ -1,15 +1,30 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ get_locale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ポモドーロタイマー{% endblock %}</title>
+    <title>{% block title %}{{ _('Pomodoro Timer') }}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
+    <div class="language-selector">
+        <select id="languageSelect" onchange="changeLanguage(this.value)">
+            <option value="en" {% if get_locale() == 'en' %}selected{% endif %}>English</option>
+            <option value="ja" {% if get_locale() == 'ja' %}selected{% endif %}>日本語</option>
+        </select>
+    </div>
     <div class="container">
         {% block content %}{% endblock %}
     </div>
+    <script>
+        function changeLanguage(lang) {
+            // Validate that lang is one of the allowed values
+            const allowedLanguages = ['en', 'ja'];
+            if (allowedLanguages.includes(lang)) {
+                window.location.href = '/set-language/' + encodeURIComponent(lang);
+            }
+        }
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

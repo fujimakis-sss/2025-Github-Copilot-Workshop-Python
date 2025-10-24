@@ -25,6 +25,30 @@ body {
     color: var(--text-color);
 }
 
+/* Language selector */
+.language-selector {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.language-selector select {
+    padding: 8px 16px;
+    font-size: 14px;
+    border: 2px solid white;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--text-color);
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.language-selector select:hover {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 .container {
     width: 100%;
     max-width: 500px;
