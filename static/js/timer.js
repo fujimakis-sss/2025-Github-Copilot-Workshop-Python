@@ -3,6 +3,7 @@ let currentMode = 'idle';
 let remainingSeconds = 0;
 let timerInterval = null;
 const CIRCLE_CIRCUMFERENCE = 754; // 2 * π * 120
+let lastToastMessage = ''; // 重複防止用
 
 // DOM要素
 const timerText = document.getElementById('timerText');
@@ -13,12 +14,37 @@ const breakBtn = document.getElementById('breakBtn');
 const stopBtn = document.getElementById('stopBtn');
 const completedCount = document.getElementById('completedCount');
 const totalTime = document.getElementById('totalTime');
+const toast = document.getElementById('toast');
 
 // 初期化
 document.addEventListener('DOMContentLoaded', () => {
     fetchState();
     setInterval(fetchState, 60000); // 1分毎に再同期
 });
+
+// トースト通知を表示
+function showToast(message) {
+    // 重複防止: 同じメッセージを連続で表示しない
+    if (message === lastToastMessage) {
+        return;
+    }
+    lastToastMessage = message;
+    
+    // メッセージを設定
+    toast.textContent = message;
+    
+    // 表示
+    toast.classList.add('show');
+    
+    // 3秒後に自動的に非表示
+    setTimeout(() => {
+        toast.classList.remove('show');
+        // 非表示後、重複防止フラグをクリア
+        setTimeout(() => {
+            lastToastMessage = '';
+        }, 300); // アニメーション完了を待つ
+    }, 3000);
+}
 
 // API呼び出し
 async function fetchState() {
@@ -28,6 +54,7 @@ async function fetchState() {
         updateUI(data);
     } catch (error) {
         console.error('状態取得エラー:', error);
+        showToast('状態の取得に失敗しました');
     }
 }
 
@@ -42,11 +69,11 @@ async function startFocus() {
             await fetchState();
         } else {
             const error = await response.json();
-            alert(error.error || '開始に失敗しました');
+            showToast(error.error || '開始に失敗しました');
         }
     } catch (error) {
         console.error('開始エラー:', error);
-        alert('開始に失敗しました');
+        showToast('開始に失敗しました');
     }
 }
 
@@ -61,11 +88,11 @@ async function startBreak() {
             await fetchState();
         } else {
             const error = await response.json();
-            alert(error.error || '休憩開始に失敗しました');
+            showToast(error.error || '休憩開始に失敗しました');
         }
     } catch (error) {
         console.error('休憩開始エラー:', error);
-        alert('休憩開始に失敗しました');
+        showToast('休憩開始に失敗しました');
     }
 }
 
@@ -76,9 +103,13 @@ async function stopSession() {
         });
         if (response.ok) {
             await fetchState();
+        } else {
+            const error = await response.json();
+            showToast(error.error || '停止に失敗しました');
         }
     } catch (error) {
         console.error('停止エラー:', error);
+        showToast('停止に失敗しました');
     }
 }
 

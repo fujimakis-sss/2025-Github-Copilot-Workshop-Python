@@ -165,6 +165,33 @@ h1 {
     margin-top: 5px;
 }
 
+/* トースト通知 */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--danger-color);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-size: 14px;
+    font-weight: 500;
+    max-width: 400px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    word-wrap: break-word;
+}
+
+.toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
 /* レスポンシブ */
 @media (max-width: 600px) {
     .pomodoro-container {
@@ -186,5 +213,11 @@ h1 {
     
     .btn {
         width: 100%;
+    }
+    
+    .toast {
+        left: 20px;
+        right: 20px;
+        max-width: none;
     }
 }
