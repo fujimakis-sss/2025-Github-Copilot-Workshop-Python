@@ -25,6 +25,23 @@ body {
     color: var(--text-color);
 }
 
+/* Skip link for screen readers */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--primary-color);
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 0 0 4px 0;
+    z-index: 100;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
 .container {
     width: 100%;
     max-width: 500px;
@@ -106,6 +123,16 @@ h1 {
     cursor: pointer;
     transition: all 0.3s ease;
     outline: none;
+}
+
+.btn:focus {
+    outline: 3px solid #ffd700;
+    outline-offset: 2px;
+}
+
+.btn:focus-visible {
+    outline: 3px solid #ffd700;
+    outline-offset: 2px;
 }
 
 .btn:hover {
