@@ -4,39 +4,18 @@ from app import create_app
 from pomodoro.models import db
 
 
-@pytest.fixture
-def app():
-    app = create_app()
-    app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    
-    with app.app_context():
-        db.create_all()
-        yield app
-        db.session.remove()
-        db.drop_all()
-
-
-@pytest.fixture
-def client(app):
-    with app.app_context():
-        yield app.test_client()
-        # Clean up any active sessions after each test
-        db.session.rollback()
-
-
-def test_start_focus_valid_duration(client):
+def test_start_focus_valid_duration(authenticated_client):
     """Test /start endpoint accepts valid duration."""
-    response = client.post('/api/pomodoro/start', json={'duration_minutes': 25})
+    response = authenticated_client.post('/api/pomodoro/start', json={'duration_minutes': 25})
     assert response.status_code == 201
     data = response.get_json()
     assert 'id' in data
     assert data['type'] == 'focus'
 
 
-def test_start_focus_invalid_duration_zero(client):
+def test_start_focus_invalid_duration_zero(authenticated_client):
     """Test /start endpoint rejects zero duration with 400."""
-    response = client.post('/api/pomodoro/start', json={'duration_minutes': 0})
+    response = authenticated_client.post('/api/pomodoro/start', json={'duration_minutes': 0})
     assert response.status_code == 400
     data = response.get_json()
     assert 'error' in data
@@ -45,9 +24,9 @@ def test_start_focus_invalid_duration_zero(client):
     assert 'at least 1 minute' in data['error']
 
 
-def test_start_focus_invalid_duration_negative(client):
+def test_start_focus_invalid_duration_negative(authenticated_client):
     """Test /start endpoint rejects negative duration with 400."""
-    response = client.post('/api/pomodoro/start', json={'duration_minutes': -5})
+    response = authenticated_client.post('/api/pomodoro/start', json={'duration_minutes': -5})
     assert response.status_code == 400
     data = response.get_json()
     assert 'error' in data
@@ -55,9 +34,9 @@ def test_start_focus_invalid_duration_negative(client):
     assert data['field'] == 'duration_minutes'
 
 
-def test_start_focus_invalid_duration_too_high(client):
+def test_start_focus_invalid_duration_too_high(authenticated_client):
     """Test /start endpoint rejects duration above 240 with 400."""
-    response = client.post('/api/pomodoro/start', json={'duration_minutes': 241})
+    response = authenticated_client.post('/api/pomodoro/start', json={'duration_minutes': 241})
     assert response.status_code == 400
     data = response.get_json()
     assert 'error' in data
@@ -66,30 +45,30 @@ def test_start_focus_invalid_duration_too_high(client):
     assert '240 minutes' in data['error']
 
 
-def test_start_focus_boundary_min(client):
+def test_start_focus_boundary_min(authenticated_client):
     """Test /start endpoint accepts minimum valid duration (1)."""
-    response = client.post('/api/pomodoro/start', json={'duration_minutes': 1})
+    response = authenticated_client.post('/api/pomodoro/start', json={'duration_minutes': 1})
     assert response.status_code == 201
 
 
-def test_start_focus_boundary_max(client):
+def test_start_focus_boundary_max(authenticated_client):
     """Test /start endpoint accepts maximum valid duration (240)."""
-    response = client.post('/api/pomodoro/start', json={'duration_minutes': 240})
+    response = authenticated_client.post('/api/pomodoro/start', json={'duration_minutes': 240})
     assert response.status_code == 201
 
 
-def test_start_break_valid_duration(client):
+def test_start_break_valid_duration(authenticated_client):
     """Test /break endpoint accepts valid duration."""
-    response = client.post('/api/pomodoro/break', json={'duration_minutes': 5})
+    response = authenticated_client.post('/api/pomodoro/break', json={'duration_minutes': 5})
     assert response.status_code == 201
     data = response.get_json()
     assert 'id' in data
     assert data['type'] == 'break'
 
 
-def test_start_break_invalid_duration_zero(client):
+def test_start_break_invalid_duration_zero(authenticated_client):
     """Test /break endpoint rejects zero duration with 400."""
-    response = client.post('/api/pomodoro/break', json={'duration_minutes': 0})
+    response = authenticated_client.post('/api/pomodoro/break', json={'duration_minutes': 0})
     assert response.status_code == 400
     data = response.get_json()
     assert 'error' in data
@@ -98,9 +77,9 @@ def test_start_break_invalid_duration_zero(client):
     assert 'at least 1 minute' in data['error']
 
 
-def test_start_break_invalid_duration_too_high(client):
+def test_start_break_invalid_duration_too_high(authenticated_client):
     """Test /break endpoint rejects duration above 240 with 400."""
-    response = client.post('/api/pomodoro/break', json={'duration_minutes': 300})
+    response = authenticated_client.post('/api/pomodoro/break', json={'duration_minutes': 300})
     assert response.status_code == 400
     data = response.get_json()
     assert 'error' in data
@@ -109,25 +88,25 @@ def test_start_break_invalid_duration_too_high(client):
     assert '240 minutes' in data['error']
 
 
-def test_start_break_boundary_min(client):
+def test_start_break_boundary_min(authenticated_client):
     """Test /break endpoint accepts minimum valid duration (1)."""
-    response = client.post('/api/pomodoro/break', json={'duration_minutes': 1})
+    response = authenticated_client.post('/api/pomodoro/break', json={'duration_minutes': 1})
     assert response.status_code == 201
 
 
-def test_start_break_boundary_max(client):
+def test_start_break_boundary_max(authenticated_client):
     """Test /break endpoint accepts maximum valid duration (240)."""
-    response = client.post('/api/pomodoro/break', json={'duration_minutes': 240})
+    response = authenticated_client.post('/api/pomodoro/break', json={'duration_minutes': 240})
     assert response.status_code == 201
 
 
-def test_start_focus_default_duration(client):
+def test_start_focus_default_duration(authenticated_client):
     """Test /start endpoint uses default duration when not provided."""
-    response = client.post('/api/pomodoro/start', json={})
+    response = authenticated_client.post('/api/pomodoro/start', json={})
     assert response.status_code == 201
 
 
-def test_start_break_default_duration(client):
+def test_start_break_default_duration(authenticated_client):
     """Test /break endpoint uses default duration when not provided."""
-    response = client.post('/api/pomodoro/break', json={})
+    response = authenticated_client.post('/api/pomodoro/break', json={})
     assert response.status_code == 201

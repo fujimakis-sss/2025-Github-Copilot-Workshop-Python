@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+from flask_login import current_user
 from .models import db, PomodoroSession, DailyStat
 from .validators import validate_duration
 
@@ -12,13 +13,14 @@ def start_focus(duration_minutes: int = FOCUS_DEFAULT_MINUTES) -> PomodoroSessio
     validate_duration(duration_minutes)
     
     # アクティブなセッションがあればエラー
-    active = PomodoroSession.query.filter_by(status='active').first()
+    active = PomodoroSession.query.filter_by(user_id=current_user.id, status='active').first()
     if active:
         raise ValueError('Active session already exists')
     
     duration_sec = duration_minutes * 60
     now = datetime.now(timezone.utc)
     session = PomodoroSession(
+        user_id=current_user.id,
         type='focus',
         planned_duration_sec=duration_sec,
         start_at=now,
@@ -35,13 +37,14 @@ def start_break(duration_minutes: int = BREAK_DEFAULT_MINUTES) -> PomodoroSessio
     validate_duration(duration_minutes)
     
     # アクティブなセッションがあればエラー
-    active = PomodoroSession.query.filter_by(status='active').first()
+    active = PomodoroSession.query.filter_by(user_id=current_user.id, status='active').first()
     if active:
         raise ValueError('Active session already exists')
     
     duration_sec = duration_minutes * 60
     now = datetime.now(timezone.utc)
     session = PomodoroSession(
+        user_id=current_user.id,
         type='break',
         planned_duration_sec=duration_sec,
         start_at=now,
@@ -54,7 +57,7 @@ def start_break(duration_minutes: int = BREAK_DEFAULT_MINUTES) -> PomodoroSessio
 
 
 def stop_active_session() -> None:
-    active = PomodoroSession.query.filter_by(status='active').first()
+    active = PomodoroSession.query.filter_by(user_id=current_user.id, status='active').first()
     if active:
         active.status = 'aborted'
         active.end_at = datetime.now(timezone.utc)
@@ -62,7 +65,7 @@ def stop_active_session() -> None:
 
 
 def complete_session(session_id: int) -> None:
-    session = PomodoroSession.query.get(session_id)
+    session = PomodoroSession.query.filter_by(id=session_id, user_id=current_user.id).first()
     if not session or session.status != 'active':
         return
     
@@ -72,9 +75,9 @@ def complete_session(session_id: int) -> None:
     # フォーカスセッション完了時、統計を更新
     if session.type == 'focus':
         today = datetime.now(timezone.utc).date()
-        stat = DailyStat.query.filter_by(date=today).first()
+        stat = DailyStat.query.filter_by(user_id=current_user.id, date=today).first()
         if not stat:
-            stat = DailyStat(date=today, total_focus_seconds=0, completed_focus_count=0)
+            stat = DailyStat(user_id=current_user.id, date=today, total_focus_seconds=0, completed_focus_count=0)
             db.session.add(stat)
         stat.completed_focus_count += 1
         stat.total_focus_seconds += session.planned_duration_sec
@@ -84,7 +87,7 @@ def complete_session(session_id: int) -> None:
 
 def get_state() -> dict:
     now = datetime.now(timezone.utc)
-    active = PomodoroSession.query.filter_by(status='active').first()
+    active = PomodoroSession.query.filter_by(user_id=current_user.id, status='active').first()
     
     if active:
         # DBから取得したdatetimeはnaiveなのでUTCとして扱う
@@ -102,7 +105,7 @@ def get_state() -> dict:
     
     # 今日の統計取得
     today = datetime.now(timezone.utc).date()
-    stat = DailyStat.query.filter_by(date=today).first()
+    stat = DailyStat.query.filter_by(user_id=current_user.id, date=today).first()
     
     return {
         'mode': mode,
