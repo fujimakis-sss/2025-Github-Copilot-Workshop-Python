@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from . import bp
-from .services import start_focus, start_break, stop_active_session, get_state
+from .services import start_focus, start_break, stop_active_session, get_state, start_long_break, decline_long_break
 from .validators import ValidationError
 
 @bp.post('/start')
@@ -39,3 +39,17 @@ def stop_route():
 @bp.get('/state')
 def state_route():
     return jsonify(get_state())
+
+@bp.post('/long-break')
+def start_long_break_route():
+    try:
+        session = start_long_break()
+        return jsonify({'id': session.id, 'type': session.type, 'planned_end_at': session.planned_end_at.isoformat(), 'duration_minutes': 15}), 201
+    except ValueError as e:
+        import logging; logging.exception("Error in start_long_break_route")
+        return jsonify({'error': 'Invalid input provided.'}), 409
+
+@bp.post('/decline-long-break')
+def decline_long_break_route():
+    decline_long_break()
+    return jsonify({'status': 'declined', 'message': 'Long break declined, cycle reset'})
