@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from . import bp
-from .services import start_focus, start_break, stop_active_session, get_state
+from .services import start_focus, start_break, stop_active_session, get_state, get_weekly_stats, get_monthly_stats
 from .validators import ValidationError
 
 @bp.post('/start')
@@ -39,3 +39,13 @@ def stop_route():
 @bp.get('/state')
 def state_route():
     return jsonify(get_state())
+
+@bp.get('/stats/weekly')
+def weekly_stats_route():
+    """Get weekly statistics for the last 7 days."""
+    return jsonify(get_weekly_stats())
+
+@bp.get('/stats/monthly')
+def monthly_stats_route():
+    """Get monthly statistics for the last 30 days."""
+    return jsonify(get_monthly_stats())
