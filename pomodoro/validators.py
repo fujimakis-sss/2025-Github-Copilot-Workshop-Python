@@ -2,6 +2,7 @@
 
 MIN_DURATION_MINUTES = 1
 MAX_DURATION_MINUTES = 240
+MAX_TAG_LENGTH = 50
 
 
 class ValidationError(ValueError):
@@ -27,3 +28,23 @@ def validate_duration(duration_minutes: int) -> None:
     
     if duration_minutes > MAX_DURATION_MINUTES:
         raise ValidationError(f"Duration must be at most {MAX_DURATION_MINUTES} minutes")
+
+
+def validate_tag(tag: str) -> None:
+    """
+    Validate that tag is within acceptable length.
+    
+    Args:
+        tag: Tag string to validate
+        
+    Raises:
+        ValidationError: If tag exceeds the maximum length
+    """
+    if tag is None:
+        return
+    
+    if not isinstance(tag, str):
+        raise ValidationError("Tag must be a string")
+    
+    if len(tag) > MAX_TAG_LENGTH:
+        raise ValidationError(f"Tag must be at most {MAX_TAG_LENGTH} characters")

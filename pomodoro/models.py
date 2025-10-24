@@ -13,6 +13,7 @@ class PomodoroSession(db.Model):
     planned_end_at = db.Column(db.DateTime, nullable=False)
     end_at = db.Column(db.DateTime, nullable=True)
     status = db.Column(db.String(20), nullable=False, default='active')  # 'active','completed','aborted'
+    tag = db.Column(db.String(50), nullable=True)  # Optional tag for categorization
     
     def to_dict(self):
         return {
@@ -22,7 +23,8 @@ class PomodoroSession(db.Model):
             'start_at': self.start_at.isoformat(),
             'planned_end_at': self.planned_end_at.isoformat(),
             'end_at': self.end_at.isoformat() if self.end_at else None,
-            'status': self.status
+            'status': self.status,
+            'tag': self.tag
         }
 
 class DailyStat(db.Model):
