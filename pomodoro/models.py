@@ -32,11 +32,13 @@ class DailyStat(db.Model):
     date = db.Column(db.Date, nullable=False, unique=True, index=True)
     total_focus_seconds = db.Column(db.Integer, nullable=False, default=0)
     completed_focus_count = db.Column(db.Integer, nullable=False, default=0)
+    cycle_count = db.Column(db.Integer, nullable=False, default=0)
     
     def to_dict(self):
         return {
             'date': self.date.isoformat(),
             'total_focus_seconds': self.total_focus_seconds,
-            'completed_focus_count': self.completed_focus_count
+            'completed_focus_count': self.completed_focus_count,
+            'cycle_count': self.cycle_count
         }
 

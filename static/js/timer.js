@@ -13,6 +13,9 @@ const breakBtn = document.getElementById('breakBtn');
 const stopBtn = document.getElementById('stopBtn');
 const completedCount = document.getElementById('completedCount');
 const totalTime = document.getElementById('totalTime');
+const longBreakModal = document.getElementById('longBreakModal');
+const acceptLongBreakBtn = document.getElementById('acceptLongBreakBtn');
+const declineLongBreakBtn = document.getElementById('declineLongBreakBtn');
 
 // 初期化
 document.addEventListener('DOMContentLoaded', () => {
@@ -82,6 +85,39 @@ async function stopSession() {
     }
 }
 
+async function startLongBreak() {
+    try {
+        const response = await fetch('/api/pomodoro/long-break', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        if (response.ok) {
+            hideModal();
+            await fetchState();
+        } else {
+            const error = await response.json();
+            alert(error.error || '長い休憩の開始に失敗しました');
+        }
+    } catch (error) {
+        console.error('長い休憩開始エラー:', error);
+        alert('長い休憩の開始に失敗しました');
+    }
+}
+
+async function declineLongBreak() {
+    try {
+        const response = await fetch('/api/pomodoro/decline-long-break', {
+            method: 'POST'
+        });
+        if (response.ok) {
+            hideModal();
+            await fetchState();
+        }
+    } catch (error) {
+        console.error('長い休憩辞退エラー:', error);
+    }
+}
+
 // UI更新
 function updateUI(state) {
     currentMode = state.mode;
@@ -115,6 +151,11 @@ function updateUI(state) {
     const hours = Math.floor(state.total_focus_seconds / 3600);
     const minutes = Math.floor((state.total_focus_seconds % 3600) / 60);
     totalTime.textContent = hours > 0 ? `${hours}時間${minutes}分` : `${minutes}分`;
+    
+    // 長い休憩の提案チェック
+    if (state.suggest_long_break) {
+        showModal();
+    }
     
     // タイマー開始/停止
     if (currentMode !== 'idle' && remainingSeconds > 0) {
@@ -159,7 +200,27 @@ function updateTimerDisplay(seconds) {
     progressCircle.style.strokeDashoffset = offset;
 }
 
+// Modal functions
+function showModal() {
+    longBreakModal.classList.add('show');
+    longBreakModal.setAttribute('aria-hidden', 'false');
+}
+
+function hideModal() {
+    longBreakModal.classList.remove('show');
+    longBreakModal.setAttribute('aria-hidden', 'true');
+}
+
 // イベントリスナー
 startBtn.addEventListener('click', startFocus);
 breakBtn.addEventListener('click', startBreak);
 stopBtn.addEventListener('click', stopSession);
+acceptLongBreakBtn.addEventListener('click', startLongBreak);
+declineLongBreakBtn.addEventListener('click', declineLongBreak);
+
+// モーダル外クリックで閉じる
+longBreakModal.addEventListener('click', (e) => {
+    if (e.target === longBreakModal) {
+        declineLongBreak();
+    }
+});
