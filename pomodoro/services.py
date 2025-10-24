@@ -111,3 +111,81 @@ def get_state() -> dict:
         'total_focus_seconds': stat.total_focus_seconds if stat else 0
     }
 
+
+def get_weekly_stats() -> list:
+    """Get statistics for the last 7 days."""
+    today = datetime.now(timezone.utc).date()
+    start_date = today - timedelta(days=6)
+    
+    stats = DailyStat.query.filter(
+        DailyStat.date >= start_date,
+        DailyStat.date <= today
+    ).order_by(DailyStat.date).all()
+    
+    # Create a dict for easy lookup
+    stats_dict = {stat.date: stat for stat in stats}
+    
+    # Build result with all days in range, filling in missing days with zeros
+    result = []
+    for i in range(7):
+        date = start_date + timedelta(days=i)
+        stat = stats_dict.get(date)
+        
+        if stat:
+            total_sessions = stat.completed_focus_count
+            completion_rate = 1.0 if total_sessions > 0 else 0.0
+            result.append({
+                'date': date.isoformat(),
+                'focus_count': stat.completed_focus_count,
+                'total_seconds': stat.total_focus_seconds,
+                'completion_rate': completion_rate
+            })
+        else:
+            result.append({
+                'date': date.isoformat(),
+                'focus_count': 0,
+                'total_seconds': 0,
+                'completion_rate': 0.0
+            })
+    
+    return result
+
+
+def get_monthly_stats() -> list:
+    """Get statistics for the last 30 days."""
+    today = datetime.now(timezone.utc).date()
+    start_date = today - timedelta(days=29)
+    
+    stats = DailyStat.query.filter(
+        DailyStat.date >= start_date,
+        DailyStat.date <= today
+    ).order_by(DailyStat.date).all()
+    
+    # Create a dict for easy lookup
+    stats_dict = {stat.date: stat for stat in stats}
+    
+    # Build result with all days in range, filling in missing days with zeros
+    result = []
+    for i in range(30):
+        date = start_date + timedelta(days=i)
+        stat = stats_dict.get(date)
+        
+        if stat:
+            total_sessions = stat.completed_focus_count
+            completion_rate = 1.0 if total_sessions > 0 else 0.0
+            result.append({
+                'date': date.isoformat(),
+                'focus_count': stat.completed_focus_count,
+                'total_seconds': stat.total_focus_seconds,
+                'completion_rate': completion_rate
+            })
+        else:
+            result.append({
+                'date': date.isoformat(),
+                'focus_count': 0,
+                'total_seconds': 0,
+                'completion_rate': 0.0
+            })
+    
+    return result
+
