@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from . import bp
 from .services import start_focus, start_break, stop_active_session, get_state
+from .validators import ValidationError
 
 @bp.post('/start')
 def start_focus_route():
@@ -9,6 +10,9 @@ def start_focus_route():
     try:
         session = start_focus(duration)
         return jsonify({'id': session.id, 'type': session.type, 'planned_end_at': session.planned_end_at.isoformat()}), 201
+    except ValidationError as e:
+        import logging; logging.exception("Validation error in start_focus_route")
+        return jsonify({'error': 'Invalid value for duration_minutes.', 'field': 'duration_minutes'}), 400
     except ValueError as e:
         import logging; logging.exception("Error in start_focus_route")
         return jsonify({'error': 'Invalid input provided.'}), 409
@@ -20,6 +24,9 @@ def start_break_route():
     try:
         session = start_break(duration)
         return jsonify({'id': session.id, 'type': session.type, 'planned_end_at': session.planned_end_at.isoformat()}), 201
+    except ValidationError as e:
+        import logging; logging.exception("Validation error in start_break_route")
+        return jsonify({'error': 'Invalid value for duration_minutes.', 'field': 'duration_minutes'}), 400
     except ValueError as e:
         import logging; logging.exception("Error in start_break_route")
         return jsonify({'error': 'Invalid input provided.'}), 409

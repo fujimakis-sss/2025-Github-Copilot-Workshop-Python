@@ -43,3 +43,55 @@ def test_start_break_conflict(app_context):
         start_break(1)
     stop_active_session()
 
+
+def test_start_focus_invalid_duration_too_low(app_context):
+    """Test that start_focus rejects duration below minimum."""
+    with pytest.raises(ValueError, match="Duration must be at least 1 minute"):
+        start_focus(0)
+
+
+def test_start_focus_invalid_duration_negative(app_context):
+    """Test that start_focus rejects negative duration."""
+    with pytest.raises(ValueError, match="Duration must be at least 1 minute"):
+        start_focus(-5)
+
+
+def test_start_focus_invalid_duration_too_high(app_context):
+    """Test that start_focus rejects duration above maximum."""
+    with pytest.raises(ValueError, match="Duration must be at most 240 minutes"):
+        start_focus(241)
+
+
+def test_start_focus_valid_duration_boundaries(app_context):
+    """Test that start_focus accepts valid boundary durations."""
+    session = start_focus(1)  # Minimum valid
+    assert session.id is not None
+    stop_active_session()
+    
+    session2 = start_focus(240)  # Maximum valid
+    assert session2.id is not None
+    stop_active_session()
+
+
+def test_start_break_invalid_duration_too_low(app_context):
+    """Test that start_break rejects duration below minimum."""
+    with pytest.raises(ValueError, match="Duration must be at least 1 minute"):
+        start_break(0)
+
+
+def test_start_break_invalid_duration_too_high(app_context):
+    """Test that start_break rejects duration above maximum."""
+    with pytest.raises(ValueError, match="Duration must be at most 240 minutes"):
+        start_break(300)
+
+
+def test_start_break_valid_duration_boundaries(app_context):
+    """Test that start_break accepts valid boundary durations."""
+    session = start_break(1)  # Minimum valid
+    assert session.id is not None
+    stop_active_session()
+    
+    session2 = start_break(240)  # Maximum valid
+    assert session2.id is not None
+    stop_active_session()
+
