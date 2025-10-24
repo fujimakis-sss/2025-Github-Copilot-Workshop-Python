@@ -1,6 +1,6 @@
 """Tests for validation functions."""
 import pytest
-from pomodoro.validators import validate_duration
+from pomodoro.validators import validate_duration, ValidationError
 
 
 def test_validate_duration_valid_min_boundary():
@@ -22,37 +22,37 @@ def test_validate_duration_valid_middle():
 
 def test_validate_duration_too_low():
     """Test validation rejects duration below minimum."""
-    with pytest.raises(ValueError, match="Duration must be at least 1 minute"):
+    with pytest.raises(ValidationError, match="Duration must be at least 1 minute"):
         validate_duration(0)
 
 
 def test_validate_duration_negative():
     """Test validation rejects negative duration."""
-    with pytest.raises(ValueError, match="Duration must be at least 1 minute"):
+    with pytest.raises(ValidationError, match="Duration must be at least 1 minute"):
         validate_duration(-1)
 
 
 def test_validate_duration_too_high():
     """Test validation rejects duration above maximum."""
-    with pytest.raises(ValueError, match="Duration must be at most 240 minutes"):
+    with pytest.raises(ValidationError, match="Duration must be at most 240 minutes"):
         validate_duration(241)
 
 
 def test_validate_duration_way_too_high():
     """Test validation rejects extremely high duration."""
-    with pytest.raises(ValueError, match="Duration must be at most 240 minutes"):
+    with pytest.raises(ValidationError, match="Duration must be at most 240 minutes"):
         validate_duration(1000)
 
 
 def test_validate_duration_invalid_type_string():
     """Test validation rejects string input."""
-    with pytest.raises(ValueError, match="Duration must be a number"):
+    with pytest.raises(ValidationError, match="Duration must be a number"):
         validate_duration("25")
 
 
 def test_validate_duration_invalid_type_none():
     """Test validation rejects None input."""
-    with pytest.raises(ValueError, match="Duration must be a number"):
+    with pytest.raises(ValidationError, match="Duration must be a number"):
         validate_duration(None)
 
 

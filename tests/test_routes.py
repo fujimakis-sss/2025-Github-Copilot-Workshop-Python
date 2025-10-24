@@ -19,7 +19,10 @@ def app():
 
 @pytest.fixture
 def client(app):
-    return app.test_client()
+    with app.app_context():
+        yield app.test_client()
+        # Clean up any active sessions after each test
+        db.session.rollback()
 
 
 def test_start_focus_valid_duration(client):

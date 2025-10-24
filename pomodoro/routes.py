@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from . import bp
 from .services import start_focus, start_break, stop_active_session, get_state
+from .validators import ValidationError
 
 @bp.post('/start')
 def start_focus_route():
@@ -9,11 +10,9 @@ def start_focus_route():
     try:
         session = start_focus(duration)
         return jsonify({'id': session.id, 'type': session.type, 'planned_end_at': session.planned_end_at.isoformat()}), 201
+    except ValidationError as e:
+        return jsonify({'error': str(e), 'field': 'duration_minutes'}), 400
     except ValueError as e:
-        error_msg = str(e)
-        # Check if it's a validation error (duration-related)
-        if 'Duration' in error_msg or 'minute' in error_msg:
-            return jsonify({'error': error_msg, 'field': 'duration_minutes'}), 400
         import logging; logging.exception("Error in start_focus_route")
         return jsonify({'error': 'Invalid input provided.'}), 409
 
@@ -24,11 +23,9 @@ def start_break_route():
     try:
         session = start_break(duration)
         return jsonify({'id': session.id, 'type': session.type, 'planned_end_at': session.planned_end_at.isoformat()}), 201
+    except ValidationError as e:
+        return jsonify({'error': str(e), 'field': 'duration_minutes'}), 400
     except ValueError as e:
-        error_msg = str(e)
-        # Check if it's a validation error (duration-related)
-        if 'Duration' in error_msg or 'minute' in error_msg:
-            return jsonify({'error': error_msg, 'field': 'duration_minutes'}), 400
         import logging; logging.exception("Error in start_break_route")
         return jsonify({'error': 'Invalid input provided.'}), 409
 
