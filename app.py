@@ -1,6 +1,6 @@
 from flask import Flask, request, session
 from dotenv import load_dotenv
-from flask_babel import Babel
+from flask_babel import Babel, get_locale as babel_get_locale
 import os
 
 def get_locale():
@@ -8,7 +8,8 @@ def get_locale():
 	if 'language' in session:
 		return session['language']
 	# Otherwise, try to guess from Accept-Language header
-	return request.accept_languages.best_match(['en', 'ja'])
+	best_match = request.accept_languages.best_match(['en', 'ja'])
+	return best_match if best_match else 'ja'
 
 def create_app():
 	# .env読み込み (存在しない場合は無視)
@@ -24,6 +25,11 @@ def create_app():
 	
 	# Initialize Babel
 	babel = Babel(app, locale_selector=get_locale)
+	
+	# Make get_locale available in templates
+	@app.context_processor
+	def inject_locale():
+		return dict(get_locale=babel_get_locale)
 
 	# SQLAlchemy初期化
 	from pomodoro.models import db
