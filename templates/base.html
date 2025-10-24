@@ -18,7 +18,11 @@
     </div>
     <script>
         function changeLanguage(lang) {
-            window.location.href = '/set-language/' + lang;
+            // Validate that lang is one of the allowed values
+            const allowedLanguages = ['en', 'ja'];
+            if (allowedLanguages.includes(lang)) {
+                window.location.href = '/set-language/' + encodeURIComponent(lang);
+            }
         }
     </script>
     {% block scripts %}{% endblock %}
