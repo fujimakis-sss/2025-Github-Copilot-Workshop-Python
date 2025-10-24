@@ -1,6 +1,9 @@
 from flask import Flask
+from flask_socketio import SocketIO
 from dotenv import load_dotenv
 import os
+
+socketio = None
 
 def create_app():
 	# .env読み込み (存在しない場合は無視)
@@ -8,6 +11,10 @@ def create_app():
 
 	app = Flask(__name__)
 	app.config.from_object('config.Config')
+
+	# SocketIO初期化
+	global socketio
+	socketio = SocketIO(app, cors_allowed_origins="*")
 
 	# SQLAlchemy初期化
 	from pomodoro.models import db
@@ -38,4 +45,4 @@ def create_app():
 
 if __name__ == '__main__':
 	app = create_app()
-	app.run(debug=os.environ.get('FLASK_DEBUG', 'False').lower() == 'true')
+	socketio.run(app, debug=os.environ.get('FLASK_DEBUG', 'False').lower() == 'true')
