@@ -2,6 +2,9 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 from .models import db, PomodoroSession, DailyStat
 from .validators import validate_duration
+import logging
+
+logger = logging.getLogger(__name__)
 
 FOCUS_DEFAULT_MINUTES = 25
 BREAK_DEFAULT_MINUTES = 5
@@ -29,6 +32,18 @@ def start_focus(duration_minutes: int = FOCUS_DEFAULT_MINUTES) -> PomodoroSessio
     )
     db.session.add(session)
     db.session.commit()
+    
+    # Log session start
+    logger.info(
+        'Focus session started',
+        extra={
+            'event': 'session_start',
+            'session_id': session.id,
+            'session_type': 'focus',
+            'duration': duration_sec
+        }
+    )
+    
     return session
 
 
@@ -52,6 +67,18 @@ def start_break(duration_minutes: int = BREAK_DEFAULT_MINUTES) -> PomodoroSessio
     )
     db.session.add(session)
     db.session.commit()
+    
+    # Log session start
+    logger.info(
+        'Break session started',
+        extra={
+            'event': 'session_start',
+            'session_id': session.id,
+            'session_type': 'break',
+            'duration': duration_sec
+        }
+    )
+    
     return session
 
 
@@ -84,6 +111,17 @@ def stop_active_session() -> None:
         active.status = 'aborted'
         active.end_at = datetime.now(timezone.utc)
         db.session.commit()
+        
+        # Log session stop
+        logger.info(
+            'Session stopped',
+            extra={
+                'event': 'session_stop',
+                'session_id': active.id,
+                'session_type': active.type,
+                'status': 'aborted'
+            }
+        )
 
 
 def complete_session(session_id: int) -> None:
@@ -106,6 +144,18 @@ def complete_session(session_id: int) -> None:
         stat.cycle_count += 1
     
     db.session.commit()
+    
+    # Log session completion
+    logger.info(
+        'Session completed',
+        extra={
+            'event': 'session_complete',
+            'session_id': session.id,
+            'session_type': session.type,
+            'duration': session.planned_duration_sec,
+            'status': 'completed'
+        }
+    )
 
 
 def get_state() -> dict:
