@@ -131,3 +131,150 @@ def test_start_break_default_duration(client):
     """Test /break endpoint uses default duration when not provided."""
     response = client.post('/api/pomodoro/break', json={})
     assert response.status_code == 201
+
+
+def test_get_state_idle(client):
+    """Test /state endpoint returns idle when no active session."""
+    response = client.get('/api/pomodoro/state')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['mode'] == 'idle'
+    assert data['remaining_seconds'] == 0
+    assert 'completed_focus_count' in data
+    assert 'total_focus_seconds' in data
+
+
+def test_get_state_active_focus(client):
+    """Test /state endpoint returns focus mode when focus session is active."""
+    # Start a focus session
+    client.post('/api/pomodoro/start', json={'duration_minutes': 25})
+    
+    # Get state
+    response = client.get('/api/pomodoro/state')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['mode'] == 'focus'
+    assert data['remaining_seconds'] > 0
+    assert data['remaining_seconds'] <= 1500  # 25 minutes
+
+
+def test_get_state_active_break(client):
+    """Test /state endpoint returns break mode when break session is active."""
+    # Start a break session
+    client.post('/api/pomodoro/break', json={'duration_minutes': 5})
+    
+    # Get state
+    response = client.get('/api/pomodoro/state')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['mode'] == 'break'
+    assert data['remaining_seconds'] > 0
+    assert data['remaining_seconds'] <= 300  # 5 minutes
+
+
+def test_stop_endpoint(client):
+    """Test /stop endpoint successfully stops active session."""
+    # Start a focus session
+    response = client.post('/api/pomodoro/start', json={'duration_minutes': 25})
+    assert response.status_code == 201
+    
+    # Stop the session
+    response = client.post('/api/pomodoro/stop')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['status'] == 'stopped'
+    
+    # Verify state is idle
+    response = client.get('/api/pomodoro/state')
+    data = response.get_json()
+    assert data['mode'] == 'idle'
+
+
+def test_stop_when_no_active_session(client):
+    """Test /stop endpoint handles no active session gracefully."""
+    response = client.post('/api/pomodoro/stop')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['status'] == 'stopped'
+
+
+def test_conflict_focus_when_focus_active(client):
+    """Test starting focus when focus is already active returns conflict."""
+    # Start first focus
+    client.post('/api/pomodoro/start', json={'duration_minutes': 25})
+    
+    # Try to start another focus
+    response = client.post('/api/pomodoro/start', json={'duration_minutes': 25})
+    assert response.status_code == 409
+    data = response.get_json()
+    assert 'error' in data
+
+
+def test_conflict_break_when_focus_active(client):
+    """Test starting break when focus is active returns conflict."""
+    # Start focus
+    client.post('/api/pomodoro/start', json={'duration_minutes': 25})
+    
+    # Try to start break
+    response = client.post('/api/pomodoro/break', json={'duration_minutes': 5})
+    assert response.status_code == 409
+    data = response.get_json()
+    assert 'error' in data
+
+
+def test_conflict_focus_when_break_active(client):
+    """Test starting focus when break is active returns conflict."""
+    # Start break
+    client.post('/api/pomodoro/break', json={'duration_minutes': 5})
+    
+    # Try to start focus
+    response = client.post('/api/pomodoro/start', json={'duration_minutes': 25})
+    assert response.status_code == 409
+    data = response.get_json()
+    assert 'error' in data
+
+
+def test_start_focus_missing_json_body(client):
+    """Test /start endpoint handles missing JSON body gracefully."""
+    response = client.post('/api/pomodoro/start', 
+                          data='',
+                          content_type='application/json')
+    assert response.status_code == 201  # Should use default
+
+
+def test_start_break_missing_json_body(client):
+    """Test /break endpoint handles missing JSON body gracefully."""
+    response = client.post('/api/pomodoro/break',
+                          data='',
+                          content_type='application/json')
+    assert response.status_code == 201  # Should use default
+
+
+def test_start_focus_invalid_json(client):
+    """Test /start endpoint handles invalid JSON gracefully."""
+    response = client.post('/api/pomodoro/start',
+                          data='invalid json',
+                          content_type='application/json')
+    assert response.status_code == 201  # Should use default due to silent=True
+
+
+def test_start_focus_returns_correct_session_data(client):
+    """Test /start endpoint returns complete session data."""
+    response = client.post('/api/pomodoro/start', json={'duration_minutes': 30})
+    assert response.status_code == 201
+    data = response.get_json()
+    assert 'id' in data
+    assert 'type' in data
+    assert data['type'] == 'focus'
+    assert 'planned_end_at' in data
+
+
+def test_start_break_returns_correct_session_data(client):
+    """Test /break endpoint returns complete session data."""
+    response = client.post('/api/pomodoro/break', json={'duration_minutes': 10})
+    assert response.status_code == 201
+    data = response.get_json()
+    assert 'id' in data
+    assert 'type' in data
+    assert data['type'] == 'break'
+    assert 'planned_end_at' in data

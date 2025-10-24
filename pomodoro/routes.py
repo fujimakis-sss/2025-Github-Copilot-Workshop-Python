@@ -12,7 +12,7 @@ def start_focus_route():
         return jsonify({'id': session.id, 'type': session.type, 'planned_end_at': session.planned_end_at.isoformat()}), 201
     except ValidationError as e:
         import logging; logging.exception("Validation error in start_focus_route")
-        return jsonify({'error': 'Invalid value for duration_minutes.', 'field': 'duration_minutes'}), 400
+        return jsonify({'error': str(e), 'field': 'duration_minutes'}), 400
     except ValueError as e:
         import logging; logging.exception("Error in start_focus_route")
         return jsonify({'error': 'Invalid input provided.'}), 409
@@ -26,7 +26,7 @@ def start_break_route():
         return jsonify({'id': session.id, 'type': session.type, 'planned_end_at': session.planned_end_at.isoformat()}), 201
     except ValidationError as e:
         import logging; logging.exception("Validation error in start_break_route")
-        return jsonify({'error': 'Invalid value for duration_minutes.', 'field': 'duration_minutes'}), 400
+        return jsonify({'error': str(e), 'field': 'duration_minutes'}), 400
     except ValueError as e:
         import logging; logging.exception("Error in start_break_route")
         return jsonify({'error': 'Invalid input provided.'}), 409
