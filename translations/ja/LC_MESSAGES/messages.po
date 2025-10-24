@@ -1,0 +1,92 @@
+# Japanese translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-10-24 08:10+0000\n"
+"PO-Revision-Date: 2025-10-24 08:10+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: templates/base.html:6 templates/pomodoro/index.html:5
+msgid "Pomodoro Timer"
+msgstr "ポモドーロタイマー"
+
+#: templates/pomodoro/index.html:7 templates/pomodoro/index.html:41
+msgid "Working"
+msgstr "作業中"
+
+#: templates/pomodoro/index.html:18
+msgid "Start Focus"
+msgstr "フォーカス開始"
+
+#: templates/pomodoro/index.html:18
+msgid "Start"
+msgstr "開始"
+
+#: templates/pomodoro/index.html:19
+msgid "Start Break"
+msgstr "休憩開始"
+
+#: templates/pomodoro/index.html:19
+msgid "Break"
+msgstr "休憩"
+
+#: templates/pomodoro/index.html:20
+msgid "Stop"
+msgstr "停止"
+
+#: templates/pomodoro/index.html:20
+msgid "Reset"
+msgstr "リセット"
+
+#: templates/pomodoro/index.html:24
+msgid "Today's Progress"
+msgstr "今日の進捗"
+
+#: templates/pomodoro/index.html:27
+msgid "Completed"
+msgstr "完了"
+
+#: templates/pomodoro/index.html:30
+msgid "1 hour 40 minutes"
+msgstr "1時間40分"
+
+#: templates/pomodoro/index.html:31
+msgid "Focus Time"
+msgstr "集中時間"
+
+#: templates/pomodoro/index.html:42
+msgid "On Break"
+msgstr "休憩中"
+
+#: templates/pomodoro/index.html:43
+msgid "Idle"
+msgstr "待機中"
+
+#: templates/pomodoro/index.html:44
+msgid "Failed to start"
+msgstr "開始に失敗しました"
+
+#: templates/pomodoro/index.html:45
+msgid "Failed to start break"
+msgstr "休憩開始に失敗しました"
+
+#: templates/pomodoro/index.html:46
+msgid "hours"
+msgstr "時間"
+
+#: templates/pomodoro/index.html:47
+msgid "minutes"
+msgstr "分"
+

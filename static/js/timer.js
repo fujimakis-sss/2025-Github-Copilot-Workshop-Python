@@ -42,11 +42,11 @@ async function startFocus() {
             await fetchState();
         } else {
             const error = await response.json();
-            alert(error.error || '開始に失敗しました');
+            alert(error.error || i18n.startFailed);
         }
     } catch (error) {
         console.error('開始エラー:', error);
-        alert('開始に失敗しました');
+        alert(i18n.startFailed);
     }
 }
 
@@ -61,11 +61,11 @@ async function startBreak() {
             await fetchState();
         } else {
             const error = await response.json();
-            alert(error.error || '休憩開始に失敗しました');
+            alert(error.error || i18n.breakFailed);
         }
     } catch (error) {
         console.error('休憩開始エラー:', error);
-        alert('休憩開始に失敗しました');
+        alert(i18n.breakFailed);
     }
 }
 
@@ -89,13 +89,13 @@ function updateUI(state) {
     
     // ステータステキスト
     if (currentMode === 'focus') {
-        statusText.textContent = '作業中';
+        statusText.textContent = i18n.working;
         progressCircle.style.stroke = '#667eea';
     } else if (currentMode === 'break') {
-        statusText.textContent = '休憩中';
+        statusText.textContent = i18n.breaking;
         progressCircle.style.stroke = '#48bb78';
     } else {
-        statusText.textContent = '待機中';
+        statusText.textContent = i18n.idle;
         progressCircle.style.stroke = '#cbd5e0';
     }
     
@@ -114,7 +114,7 @@ function updateUI(state) {
     completedCount.textContent = state.completed_focus_count;
     const hours = Math.floor(state.total_focus_seconds / 3600);
     const minutes = Math.floor((state.total_focus_seconds % 3600) / 60);
-    totalTime.textContent = hours > 0 ? `${hours}時間${minutes}分` : `${minutes}分`;
+    totalTime.textContent = hours > 0 ? `${hours}${i18n.hours}${minutes}${i18n.minutes}` : `${minutes}${i18n.minutes}`;
     
     // タイマー開始/停止
     if (currentMode !== 'idle' && remainingSeconds > 0) {

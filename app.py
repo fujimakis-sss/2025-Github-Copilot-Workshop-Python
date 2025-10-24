@@ -1,6 +1,14 @@
-from flask import Flask
+from flask import Flask, request, session
 from dotenv import load_dotenv
+from flask_babel import Babel
 import os
+
+def get_locale():
+	# Check if user has set language preference in session
+	if 'language' in session:
+		return session['language']
+	# Otherwise, try to guess from Accept-Language header
+	return request.accept_languages.best_match(['en', 'ja'])
 
 def create_app():
 	# .env読み込み (存在しない場合は無視)
@@ -8,6 +16,14 @@ def create_app():
 
 	app = Flask(__name__)
 	app.config.from_object('config.Config')
+	
+	# Babel configuration
+	app.config['BABEL_DEFAULT_LOCALE'] = 'ja'
+	app.config['BABEL_SUPPORTED_LOCALES'] = ['en', 'ja']
+	app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
+	
+	# Initialize Babel
+	babel = Babel(app, locale_selector=get_locale)
 
 	# SQLAlchemy初期化
 	from pomodoro.models import db
@@ -33,6 +49,13 @@ def create_app():
 	@app.route('/health')
 	def health():
 		return {'status': 'ok'}
+	
+	@app.route('/set-language/<language>')
+	def set_language(language):
+		if language in ['en', 'ja']:
+			session['language'] = language
+		from flask import redirect, url_for
+		return redirect(url_for('index'))
 
 	return app
 
