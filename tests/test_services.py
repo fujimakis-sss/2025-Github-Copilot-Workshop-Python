@@ -7,7 +7,7 @@ from pomodoro.services import start_focus, start_break, stop_active_session, get
 
 
 @pytest.fixture
-def authenticated_app_context(app):
+def authenticated_app_context(app, test_user):
     """Provides app context with authenticated user in a test request context."""
     with app.test_request_context():
         with app.app_context():

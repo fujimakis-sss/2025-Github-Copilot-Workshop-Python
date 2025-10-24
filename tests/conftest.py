@@ -4,7 +4,7 @@ from app import create_app
 from pomodoro.models import db, User
 
 
-@pytest.fixture
+@pytest.fixture(scope='function')
 def app():
     app = create_app()
     app.config['TESTING'] = True
@@ -13,28 +13,32 @@ def app():
     
     with app.app_context():
         db.create_all()
-        
-        # Create a test user
-        user = User(username='testuser')
-        user.set_password('testpass')
-        db.session.add(user)
-        db.session.commit()
-        
         yield app
-        
         db.session.remove()
         db.drop_all()
 
 
 @pytest.fixture
-def client(app):
+def test_user(app):
+    """Create a test user for tests that need it."""
     with app.app_context():
-        yield app.test_client()
+        user = User(username='testuser')
+        user.set_password('testpass')
+        db.session.add(user)
+        db.session.commit()
+        return user
 
 
 @pytest.fixture
-def authenticated_client(client, app):
+def client(app):
+    """Basic test client without authentication."""
+    return app.test_client()
+
+
+@pytest.fixture
+def authenticated_client(app, test_user):
     """Client with logged in user."""
+    client = app.test_client()
     with app.app_context():
         # Login the test user
         client.post('/login', data={

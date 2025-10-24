@@ -21,7 +21,7 @@ def test_register_new_user(client):
         assert user.check_password('newpass')
 
 
-def test_register_existing_username(client):
+def test_register_existing_username(client, test_user):
     """Test registration with existing username."""
     response = client.post('/register', data={
         'username': 'testuser',  # Already exists from fixture
@@ -30,7 +30,7 @@ def test_register_existing_username(client):
     }, follow_redirects=True)
     
     assert response.status_code == 200
-    assert b'already exists' in response.data
+    assert b'already exists' in response.data or b'\xe6\x97\xa2\xe3\x81\xab\xe5\xad\x98\xe5\x9c\xa8' in response.data  # "already exists" in Japanese
 
 
 def test_register_password_mismatch(client):
@@ -98,7 +98,7 @@ def test_protected_route_without_login(client):
     assert response.status_code == 401  # Unauthorized
 
 
-def test_user_isolation(app):
+def test_user_isolation(app, test_user):
     """Test that users can only see their own data."""
     with app.app_context():
         # Create two users

@@ -50,14 +50,13 @@ def create_app():
 	app.register_blueprint(auth_bp)
 
 	# トップページ
+	from flask_login import login_required as lr
+	
 	@app.route('/')
+	@lr
 	def index():
 		from flask import render_template
 		return render_template('pomodoro/index.html')
-	
-	# Make index route require login
-	from flask_login import login_required
-	index = login_required(index)
 
 	@app.route('/health')
 	def health():
