@@ -1,33 +1,34 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="pomodoro-container">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div class="pomodoro-container" id="main-content">
     <h1>ポモドーロタイマー</h1>
     
-    <div class="status-text" id="statusText">作業中</div>
+    <div class="status-text" id="statusText" aria-live="polite" aria-atomic="true">作業中</div>
     
-    <div class="timer-display">
-        <svg class="progress-ring" width="300" height="300">
+    <div class="timer-display" role="timer" aria-live="polite" aria-atomic="true">
+        <svg class="progress-ring" width="300" height="300" aria-hidden="true">
             <circle class="progress-ring-bg" cx="150" cy="150" r="120" />
             <circle class="progress-ring-circle" cx="150" cy="150" r="120" id="progressCircle" />
         </svg>
-        <div class="timer-text" id="timerText">25:00</div>
+        <div class="timer-text" id="timerText" aria-label="Remaining time">25:00</div>
     </div>
     
     <div class="controls">
-        <button id="startBtn" class="btn btn-primary" aria-label="フォーカス開始">開始</button>
-        <button id="breakBtn" class="btn btn-secondary" aria-label="休憩開始">休憩</button>
-        <button id="stopBtn" class="btn btn-danger" aria-label="停止" disabled>リセット</button>
+        <button id="startBtn" class="btn btn-primary" aria-label="Start focus session">開始</button>
+        <button id="breakBtn" class="btn btn-secondary" aria-label="Start break">休憩</button>
+        <button id="stopBtn" class="btn btn-danger" aria-label="Reset timer" disabled>リセット</button>
     </div>
     
-    <div class="stats">
+    <div class="stats" role="region" aria-label="Today's progress statistics">
         <h2>今日の進捗</h2>
         <div class="stat-item">
-            <span class="stat-value" id="completedCount">4</span>
+            <span class="stat-value" id="completedCount" aria-label="Completed sessions">4</span>
             <span class="stat-label">完了</span>
         </div>
         <div class="stat-item">
-            <span class="stat-value" id="totalTime">1時間40分</span>
+            <span class="stat-value" id="totalTime" aria-label="Total focus time">1時間40分</span>
             <span class="stat-label">集中時間</span>
         </div>
     </div>

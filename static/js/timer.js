@@ -90,12 +90,15 @@ function updateUI(state) {
     // ステータステキスト
     if (currentMode === 'focus') {
         statusText.textContent = '作業中';
+        statusText.setAttribute('aria-label', 'Focus session in progress');
         progressCircle.style.stroke = '#667eea';
     } else if (currentMode === 'break') {
         statusText.textContent = '休憩中';
+        statusText.setAttribute('aria-label', 'Break session in progress');
         progressCircle.style.stroke = '#48bb78';
     } else {
         statusText.textContent = '待機中';
+        statusText.setAttribute('aria-label', 'Idle, ready to start');
         progressCircle.style.stroke = '#cbd5e0';
     }
     
@@ -150,7 +153,9 @@ function stopCountdown() {
 function updateTimerDisplay(seconds) {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    timerText.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
+    const timeString = `${minutes}:${secs.toString().padStart(2, '0')}`;
+    timerText.textContent = timeString;
+    timerText.setAttribute('aria-label', `Remaining time: ${minutes} minutes and ${secs} seconds`);
     
     // プログレスリング更新
     const totalSeconds = currentMode === 'focus' ? 25 * 60 : (currentMode === 'break' ? 5 * 60 : 25 * 60);
@@ -163,3 +168,13 @@ function updateTimerDisplay(seconds) {
 startBtn.addEventListener('click', startFocus);
 breakBtn.addEventListener('click', startBreak);
 stopBtn.addEventListener('click', stopSession);
+
+// キーボードサポート (Enter and Space)
+document.addEventListener('keydown', (event) => {
+    if (event.target.tagName === 'BUTTON') {
+        if (event.key === ' ' || event.key === 'Spacebar') {
+            event.preventDefault();
+            event.target.click();
+        }
+    }
+});
