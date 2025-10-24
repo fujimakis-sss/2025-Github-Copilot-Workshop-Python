@@ -7,6 +7,24 @@
     --text-color: #2d3748;
     --card-bg: #ffffff;
     --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --progress-bg: #e2e8f0;
+    --status-text-color: #718096;
+    --stats-border: #e2e8f0;
+}
+
+/* Dark theme colors */
+body.dark-theme {
+    --primary-color: #7c93ff;
+    --secondary-color: #9370db;
+    --success-color: #68d391;
+    --danger-color: #fc8181;
+    --bg-color: #1a202c;
+    --text-color: #e2e8f0;
+    --card-bg: #2d3748;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --progress-bg: #4a5568;
+    --status-text-color: #a0aec0;
+    --stats-border: #4a5568;
 }
 
 * {
@@ -23,6 +41,7 @@ body {
     align-items: center;
     justify-content: center;
     color: var(--text-color);
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .container {
@@ -37,6 +56,8 @@ body {
     padding: 40px;
     box-shadow: var(--shadow);
     text-align: center;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
 }
 
 h1 {
@@ -47,7 +68,7 @@ h1 {
 
 .status-text {
     font-size: 16px;
-    color: #718096;
+    color: var(--status-text-color);
     margin-bottom: 30px;
 }
 
@@ -65,8 +86,9 @@ h1 {
 
 .progress-ring-bg {
     fill: none;
-    stroke: #e2e8f0;
+    stroke: var(--progress-bg);
     stroke-width: 12;
+    transition: stroke 0.3s ease;
 }
 
 .progress-ring-circle {
@@ -76,7 +98,7 @@ h1 {
     stroke-linecap: round;
     stroke-dasharray: 754;
     stroke-dashoffset: 0;
-    transition: stroke-dashoffset 1s linear;
+    transition: stroke-dashoffset 1s linear, stroke 0.3s ease;
 }
 
 .timer-text {
@@ -136,8 +158,9 @@ h1 {
 
 /* 統計 */
 .stats {
-    border-top: 2px solid #e2e8f0;
+    border-top: 2px solid var(--stats-border);
     padding-top: 30px;
+    transition: border-color 0.3s ease;
 }
 
 .stats h2 {
@@ -161,8 +184,46 @@ h1 {
 .stat-label {
     display: block;
     font-size: 14px;
-    color: #718096;
+    color: var(--status-text-color);
     margin-top: 5px;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    padding: 0;
+}
+
+.theme-toggle:hover {
+    background: var(--primary-color);
+    transform: rotate(20deg);
+}
+
+.theme-toggle:hover svg {
+    fill: white;
+}
+
+.theme-toggle svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--primary-color);
+    transition: fill 0.3s ease;
+}
+
+.theme-toggle:hover svg {
+    fill: white;
 }
 
 /* レスポンシブ */

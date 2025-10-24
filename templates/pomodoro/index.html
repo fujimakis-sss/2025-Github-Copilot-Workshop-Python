@@ -2,6 +2,14 @@
 
 {% block content %}
 <div class="pomodoro-container">
+    <button id="themeToggle" class="theme-toggle" aria-label="テーマ切替">
+        <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M12 17.5C9.5 17.5 7.5 15.5 7.5 13S9.5 8.5 12 8.5 16.5 10.5 16.5 13 14.5 17.5 12 17.5zM12 3v2m0 14v2m9-9h-2M5 13H3m15.36-6.36l-1.41 1.41M7.05 17.95l-1.41 1.41m12.72 0l-1.41-1.41M7.05 8.05L5.64 6.64"/>
+        </svg>
+        <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display: none;">
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+        </svg>
+    </button>
     <h1>ポモドーロタイマー</h1>
     
     <div class="status-text" id="statusText">作業中</div>
