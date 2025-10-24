@@ -7,3 +7,4 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///pomodoro.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     TIMEZONE = os.getenv('TIMEZONE', 'UTC')
+    LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
