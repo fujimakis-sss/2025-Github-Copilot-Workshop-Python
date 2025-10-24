@@ -10,6 +10,10 @@ def start_focus_route():
         session = start_focus(duration)
         return jsonify({'id': session.id, 'type': session.type, 'planned_end_at': session.planned_end_at.isoformat()}), 201
     except ValueError as e:
+        error_msg = str(e)
+        # Check if it's a validation error (duration-related)
+        if 'Duration' in error_msg or 'minute' in error_msg:
+            return jsonify({'error': error_msg, 'field': 'duration_minutes'}), 400
         import logging; logging.exception("Error in start_focus_route")
         return jsonify({'error': 'Invalid input provided.'}), 409
 
@@ -21,6 +25,10 @@ def start_break_route():
         session = start_break(duration)
         return jsonify({'id': session.id, 'type': session.type, 'planned_end_at': session.planned_end_at.isoformat()}), 201
     except ValueError as e:
+        error_msg = str(e)
+        # Check if it's a validation error (duration-related)
+        if 'Duration' in error_msg or 'minute' in error_msg:
+            return jsonify({'error': error_msg, 'field': 'duration_minutes'}), 400
         import logging; logging.exception("Error in start_break_route")
         return jsonify({'error': 'Invalid input provided.'}), 409
 

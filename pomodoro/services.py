@@ -1,12 +1,16 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from .models import db, PomodoroSession, DailyStat
+from .validators import validate_duration
 
 FOCUS_DEFAULT_MINUTES = 25
 BREAK_DEFAULT_MINUTES = 5
 
 
 def start_focus(duration_minutes: int = FOCUS_DEFAULT_MINUTES) -> PomodoroSession:
+    # Validate duration
+    validate_duration(duration_minutes)
+    
     # アクティブなセッションがあればエラー
     active = PomodoroSession.query.filter_by(status='active').first()
     if active:
@@ -27,6 +31,9 @@ def start_focus(duration_minutes: int = FOCUS_DEFAULT_MINUTES) -> PomodoroSessio
 
 
 def start_break(duration_minutes: int = BREAK_DEFAULT_MINUTES) -> PomodoroSession:
+    # Validate duration
+    validate_duration(duration_minutes)
+    
     # アクティブなセッションがあればエラー
     active = PomodoroSession.query.filter_by(status='active').first()
     if active:
