@@ -94,11 +94,14 @@ def get_state() -> dict:
             complete_session(active.id)
             remaining = 0
             mode = 'idle'
+            planned_duration = 0
         else:
             mode = active.type
+            planned_duration = active.planned_duration_sec
     else:
         remaining = 0
         mode = 'idle'
+        planned_duration = 0
     
     # 今日の統計取得
     today = datetime.now(timezone.utc).date()
@@ -107,6 +110,7 @@ def get_state() -> dict:
     return {
         'mode': mode,
         'remaining_seconds': remaining,
+        'planned_duration_sec': planned_duration,
         'completed_focus_count': stat.completed_focus_count if stat else 0,
         'total_focus_seconds': stat.total_focus_seconds if stat else 0
     }

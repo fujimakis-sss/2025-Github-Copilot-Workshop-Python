@@ -4,6 +4,24 @@
 <div class="pomodoro-container">
     <h1>ポモドーロタイマー</h1>
     
+    <div class="preset-selector">
+        <h3>プリセット選択</h3>
+        <div class="preset-options">
+            <label class="preset-option">
+                <input type="radio" name="preset" value="default" checked>
+                <span>25/5 (標準)</span>
+            </label>
+            <label class="preset-option">
+                <input type="radio" name="preset" value="long">
+                <span>50/10 (長時間)</span>
+            </label>
+            <label class="preset-option">
+                <input type="radio" name="preset" value="short">
+                <span>15/3 (短時間)</span>
+            </label>
+        </div>
+    </div>
+    
     <div class="status-text" id="statusText">作業中</div>
     
     <div class="timer-display">
