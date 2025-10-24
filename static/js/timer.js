@@ -3,6 +3,8 @@ let currentMode = 'idle';
 let remainingSeconds = 0;
 let timerInterval = null;
 const CIRCLE_CIRCUMFERENCE = 754; // 2 * π * 120
+let notificationsEnabled = true;
+let notificationPermission = 'default';
 
 // DOM要素
 const timerText = document.getElementById('timerText');
@@ -18,6 +20,7 @@ const totalTime = document.getElementById('totalTime');
 document.addEventListener('DOMContentLoaded', () => {
     fetchState();
     setInterval(fetchState, 60000); // 1分毎に再同期
+    initializeNotifications();
 });
 
 // API呼び出し
@@ -135,6 +138,12 @@ function startCountdown() {
             updateTimerDisplay(remainingSeconds);
         } else {
             stopCountdown();
+            // セッション完了時に通知を表示
+            if (currentMode === 'focus') {
+                showNotification('focus', 25);
+            } else if (currentMode === 'break') {
+                showNotification('break', 5);
+            }
             fetchState(); // 終了時に再取得
         }
     }, 1000);
@@ -159,7 +168,97 @@ function updateTimerDisplay(seconds) {
     progressCircle.style.strokeDashoffset = offset;
 }
 
+// 通知機能
+async function initializeNotifications() {
+    // localStorage から通知設定を読み込む
+    const savedPreference = localStorage.getItem('notificationsEnabled');
+    if (savedPreference !== null) {
+        notificationsEnabled = savedPreference === 'true';
+    }
+    
+    // 通知トグルボタンの状態を更新
+    const notificationToggle = document.getElementById('notificationToggle');
+    if (notificationToggle) {
+        notificationToggle.checked = notificationsEnabled;
+    }
+    
+    // 通知APIが利用可能かチェック
+    if (!('Notification' in window)) {
+        console.warn('このブラウザは通知をサポートしていません');
+        if (notificationToggle) {
+            notificationToggle.disabled = true;
+        }
+        return;
+    }
+    
+    // 現在の許可状態を記録
+    notificationPermission = Notification.permission;
+    
+    // 通知が有効で、まだ許可を求めていない場合
+    if (notificationsEnabled && notificationPermission === 'default') {
+        try {
+            notificationPermission = await Notification.requestPermission();
+        } catch (error) {
+            console.error('通知許可のリクエストエラー:', error);
+        }
+    }
+}
+
+function toggleNotifications() {
+    notificationsEnabled = !notificationsEnabled;
+    localStorage.setItem('notificationsEnabled', notificationsEnabled.toString());
+    
+    // 有効化された場合で許可がまだの場合、許可をリクエスト
+    if (notificationsEnabled && notificationPermission === 'default') {
+        Notification.requestPermission().then(permission => {
+            notificationPermission = permission;
+            if (permission === 'denied') {
+                alert('通知が拒否されました。ブラウザの設定から通知を許可してください。');
+            }
+        });
+    }
+}
+
+function showNotification(sessionType, durationMinutes) {
+    // 通知が無効、または許可されていない場合は何もしない
+    if (!notificationsEnabled || notificationPermission !== 'granted') {
+        return;
+    }
+    
+    const title = sessionType === 'focus' ? '作業完了！' : '休憩完了！';
+    const body = sessionType === 'focus' 
+        ? `${durationMinutes}分の集中セッションが終了しました。休憩を取りましょう！`
+        : `${durationMinutes}分の休憩が終了しました。次の作業を始めましょう！`;
+    
+    try {
+        const notification = new Notification(title, {
+            body: body,
+            icon: '/static/pomodoro.png',
+            badge: '/static/pomodoro.png',
+            tag: 'pomodoro-timer',
+            requireInteraction: false
+        });
+        
+        // 通知をクリックしたらウィンドウにフォーカス
+        notification.onclick = () => {
+            window.focus();
+            notification.close();
+        };
+        
+        // 5秒後に自動的に閉じる
+        setTimeout(() => notification.close(), 5000);
+    } catch (error) {
+        console.error('通知の表示エラー:', error);
+    }
+}
+
 // イベントリスナー
 startBtn.addEventListener('click', startFocus);
 breakBtn.addEventListener('click', startBreak);
 stopBtn.addEventListener('click', stopSession);
+
+// 通知トグルのイベントリスナーを追加
+const notificationToggle = document.getElementById('notificationToggle');
+if (notificationToggle) {
+    notificationToggle.addEventListener('change', toggleNotifications);
+}
